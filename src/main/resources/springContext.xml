@@ -2,14 +2,77 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:context="http://www.springframework.org/schema/context"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx"
     xsi:schemaLocation="
 	http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 	http://www.springframework.org/schema/context
 	http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     
     <!-- 搜索spring控件 -->
-    <context:component-scan base-package="com.test"/>
+    <context:component-scan base-package="com.*"/>
+    
+     <!-- 引入外置文件 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+        <property name="location" value="classpath:property/init.properties"/>  
+    </bean>
+    
+    <!--数据库连接池配置-->  
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>  
+        <property name="url" value="${jdbc.url}"/>  
+        <property name="username" value="${jdbc.username}"/>  
+        <property name="password" value="${jdbc.password}"/>  
+    </bean>  
+    
+    <!-- spring和MyBatis完美整合 -->  
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">  
+        <!-- 指定数据源 -->  
+        <property name="dataSource" ref="dataSource"/> 
+        
+        <!-- 自动扫描mapping.xml文件，**表示迭代查找 ,,也可在mybatis-config.xml中单独指定xml文件 -->  
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>  
+         
+        <!-- 具体指定xml文件，可不配 -->  
+        <!-- <property name="configLocation" value="classpath:mybatis-config.xml"/>   -->
+        
+        <!-- 指定entity类 -->
+		<!-- <property name="typeAliasesPackage" value="com.gcj.entity.behaviour" /> -->
+    </bean>  
+    
+     <!-- 自动扫描com/hys/app/**/dao下的所有dao接口，并实现这些接口，可直接在程序中使用dao接口，不用再获取sqlsession对象 -->  
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+        <!-- basePackage 属性是映射器接口文件的包路径。 你可以使用分号或逗号 作为分隔符设置多于一个的包路径  -->  
+        <property name="basePackage" value="com/mapper"/>  
+        <!--  
+	                 因为会自动装配 SqlSessionFactory和SqlSessionTemplate  
+	                 所以没 有 必 要 去 指 定 SqlSessionFactory或 SqlSessionTemplate  
+	                 因此可省略不配置；  
+	                 但是,如果你使 用了一个 以上的 DataSource，那么自动装配可能会失效。  
+	                 这种 情况下，你可以使用sqlSessionFactoryBeanName或sqlSessionTemplateBeanName属性来设置正确的 bean名称来使用；  
+        -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>  
+    </bean>
+    
+    <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="hostName" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="password" value="${redis.password}"/>
+        <property name="usePool" value="true"/>
+    </bean>
+    
+     <!-- 事务管理器    
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+        <property name="dataSource" ref="dataSource" />  
+    </bean>
+    -->
+    
+     <!-- 使用声明式事务      
+    <tx:annotation-driven transaction-manager="txManager" /> 
+     -->
+   
     <!-- 视图页面配置 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix">
@@ -18,5 +81,6 @@
         <property name="suffix">
             <value>.jsp</value>
         </property>
-    </bean>-->
+    </bean>
+    -->
 </beans>
