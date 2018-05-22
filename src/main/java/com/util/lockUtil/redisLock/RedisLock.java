@@ -20,7 +20,7 @@ public class RedisLock implements Lock{
 	@Autowired
 	private JedisConnectionFactory jedisConnectionFactory;
 	
-	private static String LOCK = "lock";
+	private static final String LOCK = "lock";
 	
 	ThreadLocal<String> local = new ThreadLocal<String>();
 	
