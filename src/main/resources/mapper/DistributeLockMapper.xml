@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mapper.DistributeLockMapper">
+    <insert id="insert" parameterType="java.lang.Integer">
+        insert into distribute_lock (id) values (#{num})
+    </insert>
+    <delete id="delete" parameterType="java.lang.Integer">
+    	delete from distribute_lock where id = #{num} 
+    </delete>
+</mapper>
