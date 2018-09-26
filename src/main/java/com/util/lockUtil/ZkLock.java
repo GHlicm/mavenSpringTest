@@ -10,7 +10,10 @@ import java.util.concurrent.locks.Lock;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
+import org.springframework.data.redis.PassThroughExceptionTranslationStrategy;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ZkLock implements Lock{
 	
 	private static final String LOCK_PATH = "/LOCK";
@@ -34,21 +37,22 @@ public class ZkLock implements Lock{
 	@Override
 	public boolean tryLock() {
 		//如果currentPath为空则为第一次尝试加锁，第一次加锁赋值currentPath
-		if (currentPath == null || currentPath.length()<=0) {
+		if (currentPath == null) {
 			//创建一个临时顺序节点
 			currentPath = this.client.createEphemeralSequential(LOCK_PATH + "/", "lock");
-			System.out.println("---------------------------->" + currentPath);
+//			System.out.println("---------------------------->" + currentPath);
 		}
 		
 		List<String> childrens = this.client.getChildren(LOCK_PATH);
 		Collections.sort(childrens);
 		
-		if (currentPath.equals(LOCK_PATH + "/" + childrens.get(0))) {//如果当前节点在所有节点中排名第一则获取锁成功
+		if (currentPath.equals(LOCK_PATH + "/" + childrens.get(0))) {// 如果当前节点在所有节点中排名第一则获取锁成功
 			return true;
-		} else {//如果排名不是第一，则获取前面的节点名称，并赋值给beforePath
+		} else {// 如果排名不是第一，则获取前面的节点名称，并赋值给beforePath
 			int wz = Collections.binarySearch(childrens, currentPath.substring(6));
-			beforePath = LOCK_PATH + "/" + childrens.get(wz-1);
+			beforePath = LOCK_PATH + "/" + childrens.get(wz - 1);
 		}
+		
 		return false;
 	}
 	
@@ -58,7 +62,7 @@ public class ZkLock implements Lock{
 			waitForLock();
 			lock();
 		} else {
-			System.out.println(Thread.currentThread().getName() + "获得分布式锁！");
+//			System.out.println(Thread.currentThread().getName() + "获得分布式锁！");
 		}
 	}
 	
@@ -87,6 +91,7 @@ public class ZkLock implements Lock{
 				e.printStackTrace();
 			}
 		}
+		
 		this.client.unsubscribeDataChanges(beforePath, listener);
 	}
 	

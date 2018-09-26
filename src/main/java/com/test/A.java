@@ -1,5 +1,6 @@
 package com.test;
 
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 
 import org.I0Itec.zkclient.ZkLock;
@@ -7,7 +8,7 @@ import org.I0Itec.zkclient.ZkLock;
 public class A {
 	
 	public static void main(String[] args) throws InterruptedException {
-		
+//		new ThreadPoolExecutor()
 //		int count = 100;
 //		Lock lock = new ZkLock();
 //		

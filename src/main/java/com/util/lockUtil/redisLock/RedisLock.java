@@ -32,17 +32,22 @@ public class RedisLock implements Lock{
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			lock();
 		}
-		lock();
 	}
 
 	@Override
 	public boolean tryLock() {
-		Jedis jedis = (Jedis)jedisConnectionFactory.getConnection().getNativeConnection();
+		Jedis jedis = null;
+		try {
+			jedis = (Jedis)jedisConnectionFactory.getConnection().getNativeConnection();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		String value = UUID.randomUUID().toString();
 		local.set(value);
 		String ret = jedis.set(LOCK, value, "NX", "PX", 3000);
-		if (ret!=null && ret.equals("ok")) {
+		if ("OK".equals(ret)) {
 			return true;
 		}
 		return false;
@@ -51,13 +56,12 @@ public class RedisLock implements Lock{
 	@Override
 	public void unlock() {
 		try {
-			String script = FileUtils.readFileToString(new File("/mavenSpringTest/src/main/java/com/util/lockUtil/redisLock/unlock.lua"));
+			String script = FileUtils.readFileToString(new File("D:/Workspace/mavenSpringTest/src/main/java/com/util/lockUtil/redisLock/unlock.lua"));
 			Jedis jedis = (Jedis)jedisConnectionFactory.getConnection().getNativeConnection();
 			jedis.eval(script, Arrays.asList(LOCK), Arrays.asList(local.get()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	@Override

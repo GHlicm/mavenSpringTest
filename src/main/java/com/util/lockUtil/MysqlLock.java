@@ -26,8 +26,8 @@ public class MysqlLock implements Lock{
 			}catch(Exception e){
 				e.printStackTrace();
 			}
+			lock();
 		}
-		lock();
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class MysqlLock implements Lock{
 		try {
 			distributeLockMapper.insert(NUM);
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return false;
 		}
 		return true;
