@@ -83,9 +83,11 @@ public class RabbitMqConfig {
 //	        return new Jackson2JsonMessageConverter();
 //	 }
 	
+	// 普通队列
 	@Bean
 	public Queue helloQueue(){
-		//将普通队列绑定到死信交换机上
+		//将普通队列绑定到死信交换机上(该队列需要绑定两个交换价，还有一个默认的交换机)
+		//在消息符合进入死信队列的条件时，进入到:死信交换机→死信队列
 		Map<String, Object> args = new HashMap<>(2);
 		args.put(DEAD_LETTER_QUEUE_KEY, deadExchangeName);
 		args.put(DEAD_LETTER_ROUTING_KEY, deadRoutingKey);
@@ -93,19 +95,19 @@ public class RabbitMqConfig {
 		return queue;
 	}
 	
-	/**
-	 * 死信队列
-	 */
+	// 死信队列
 	@Bean
 	public Queue deadQueue(){
 		return new Queue(deadQueueName, true);
 	}
 	
+	// 死信交换机
 	@Bean
 	public DirectExchange deadExchange(){
 		return new DirectExchange(deadExchangeName);
 	}
 	
+	// 死信队列和死信交换机的绑定
 	@Bean
 	public Binding bindingDeadExchange(Queue deadQueue, DirectExchange deadExchange){
 		return BindingBuilder.bind(deadQueue).to(deadExchange).with(deadRoutingKey);
